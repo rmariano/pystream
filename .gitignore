@@ -1,0 +1,5 @@
+__pycache__
+*.pyc
+*.sw[op]
+.pytest_cache
+.ruff_cache
