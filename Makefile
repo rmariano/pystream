@@ -1,9 +1,12 @@
-.PHONY: test lint format install build publish
+.PHONY: test lint format install build publish clean
 
 RUN:=poetry run
 
 test: lint
 	$(RUN) pytest src/tests
+
+clean:
+	rm -fr dist/
 
 lint:
 	$(RUN) ruff check src/
