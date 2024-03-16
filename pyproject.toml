@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "pystream"
-version = "0.1.0"
+name = "pystream_collections"
+version = "0.1.1"
 description = "A helper library to manage collections more easily"
-authors = ["Mariano Anaya <marianoanaya@gmail.com>"]
-license = "MIT"
+authors = ["Mariano Anaya <mariano_anaya@yahoo.com.ar>"]
 readme = "README.md"
+license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.12"

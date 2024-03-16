@@ -1,4 +1,4 @@
-from pystream.stream import Stream
+from pystream_collections.stream import Stream
 
 
 def test_collect_simple_filter():

@@ -1,0 +1,16 @@
+---
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+    run-tests:
+      name: Run tests
+      runs-on: ubuntu-latest
+      steps:
+        - run: |
+            make install
+            make test
