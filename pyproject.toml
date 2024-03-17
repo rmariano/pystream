@@ -17,7 +17,7 @@ license = "MIT"
 Source = "https://github.com/rmariano/pystream"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.11"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.2"
