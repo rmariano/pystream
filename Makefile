@@ -3,7 +3,7 @@
 RUN:=poetry run
 
 test: lint
-	$(RUN) pytest --cov=pystream_collections src/tests
+	$(RUN) pytest --cov=pystream_collections --cov-report=xml src/tests
 
 clean:
 	rm -fr dist/
