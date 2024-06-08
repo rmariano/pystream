@@ -32,7 +32,7 @@ class Stream:
     def __init__(self, *values) -> None:
         self._wrapped = _parse_stream_parameters(*values)
         self._transformations = []
-        self._is_reduced = False
+        self._is_finished = False
 
     def map(self, fn) -> Self:
         self._transformations.append((OperationType.MAP, fn))
@@ -44,7 +44,7 @@ class Stream:
 
     def reduce(self, fn) -> Self:
         self._transformations.append((OperationType.REDUCE, fn))
-        self._is_reduced = True
+        self._is_finished = True
         return self
 
     def skip(self, n: int) -> Self:
@@ -71,6 +71,6 @@ class Stream:
         result = self._wrapped
         for op_type, tx in self._transformations:
             result = self._reducer(result, op_type, tx)
-        if self._is_reduced:
+        if self._is_finished:
             return result
         return list(result)
