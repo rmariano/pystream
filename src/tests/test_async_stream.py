@@ -12,3 +12,9 @@ async def _async_generator(n):
 async def test_collect_async_iterator(length, expected):
     sut = AsyncStream(_async_generator(length))
     assert await sut.collect() == expected
+
+
+@pytest.mark.asyncio
+async def test_map():
+    sut = AsyncStream(_async_generator(10)).map(lambda x: x * 10)
+    assert await sut.collect() == [0, 10, 20, 30, 40, 50, 60, 70, 80, 90]
