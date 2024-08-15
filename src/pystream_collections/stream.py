@@ -2,12 +2,13 @@
 
 import functools
 from itertools import islice
-from typing import Iterable, Self
+from typing import Callable, Iterable, Self
 
 from pystream_collections.enums import OperationType
+from pystream_collections.typedef import Filter, Mapper, Reducer
 
 
-def _is_iterable(value) -> bool:
+def _is_iterable(value: Iterable) -> bool:
     try:
         iter(value)
         return True
@@ -15,7 +16,7 @@ def _is_iterable(value) -> bool:
         return False
 
 
-def _parse_stream_parameters(*values):
+def _parse_stream_parameters(*values) -> Iterable:
     if len(values) == 1:
         (sole_parameter,) = values
         if _is_iterable(sole_parameter):
@@ -33,35 +34,47 @@ class Stream:
         self._transformations = []
         self._is_reduced = False
 
-    def map(self, fn) -> Self:
-        """Add a transformation function to the stream to be later processed."""
-        self._transformations.append((OperationType.MAP, fn))
+    def map(self, mapper_fn: Mapper) -> Self:
+        """
+        Add a transformation function to the stream to be later processed.
+
+        Provide a mapper function that will transform an individual value.
+        """
+        self._transformations.append((OperationType.MAP, mapper_fn))
         return self
 
-    def filter(self, fn) -> Self:
-        """Pass a filtering function to exclude values from this step of the stream onwards."""
-        self._transformations.append((OperationType.FILTER, fn))
+    def filter(self, filter_fn: Filter) -> Self:
+        """
+
+        Pass a filtering function to exclude values from this step of the stream onwards.
+
+        The function should evaluate to a boolean value.
+        """
+        self._transformations.append((OperationType.FILTER, filter_fn))
         return self
 
-    def reduce(self, fn):
+    def reduce(self, reducer_fn: Reducer) -> object:
         """
         Reduce the stream to a final value based on the provided operation.
+
+        The reducer function takes two arguments and resolves into a single value. This function is used to apply
+        the reduction over the values the stream has so far.
 
         This action is FINAL, meaning the stream returns a value after this call and cannot be further chained upon.
         """
         transformations = self._apply_transformations()
-        return functools.reduce(fn, transformations)
+        return functools.reduce(reducer_fn, transformations)
 
     def skip(self, n: int) -> Self:
         """Skip <n> elements from the current stream."""
 
-        def fn(list_of_values: list):
+        def fn(list_of_values: Iterable) -> Iterable:
             return islice(list_of_values, n, None)
 
         self._transformations.append((OperationType.SKIP, fn))
         return self
 
-    def _reducer(self, values, operation_type: OperationType, transformation):
+    def _reducer(self, values: Iterable, operation_type: OperationType, transformation: Callable) -> Iterable:
         match operation_type:
             case OperationType.MAP:
                 return map(transformation, values)

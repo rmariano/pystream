@@ -33,7 +33,7 @@ build-backend = "poetry.core.masonry.api"
 line-length = 120
 
 [tool.ruff.lint]
-select = ["E", "F", "C901", "I", "D"]
+select = ["E", "F", "C901", "I", "D", "N", "W", "ANN001", "ANN201", "ANN202", "ANN204", "ANN205", "ANN206", "ANN401"]
 ignore = ["D203", "D212"]
 # Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
