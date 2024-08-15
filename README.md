@@ -11,4 +11,12 @@ from pystream.stream import Stream
 
 Stream(2, 3, 5, 7, 11).skip(2).collect()  # [5, 7, 11]
 Stream([1, 2, 3]).map(lambda x: x + 1).filter(lambda x: x > 2).collect()  # [3, 4]
-``` 
+```
+
+You can also use the `.reduce()` function to obtain a final result based on a provided transformation function:
+
+```python
+>>> stream = Stream(("paris", "london", "stockholm")).map(str.title)
+>>> stream.reduce(lambda w1, w2: f"{w1}, {w2}")
+"Paris, London, Stockholm"
+```

@@ -3,17 +3,17 @@
 RUN:=poetry run
 
 test: lint
-	$(RUN) pytest --cov=pystream_collections --cov-report=xml src/tests
+	$(RUN) pytest --cov=pystream_collections --cov-report=xml tests
 
 clean:
 	rm -fr dist/
 
 lint:
-	$(RUN) ruff check src/
-	$(RUN) pyright src/
+	$(RUN) ruff check src/ tests/
+	$(RUN) pyright src/ tests/
 
 format:
-	$(RUN) ruff check --fix src/
+	$(RUN) ruff check --fix src/ tests/
 
 install:
 	poetry install
