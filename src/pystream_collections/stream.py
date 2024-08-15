@@ -1,14 +1,10 @@
-from typing import Self
-from enum import Enum
-from functools import reduce
+"""Definitions for the abstractions of Stream over regular iterators."""
+
+import functools
 from itertools import islice
+from typing import Iterable, Self
 
-
-class OperationType(Enum):
-    MAP = "map"
-    FILTER = "filter"
-    REDUCE = "reduce"
-    SKIP = "skip"
+from pystream_collections.enums import OperationType
 
 
 def _is_iterable(value) -> bool:
@@ -29,25 +25,36 @@ def _parse_stream_parameters(*values):
 
 
 class Stream:
+    """Define a stream to be used with regular synchronous iterator operations."""
+
     def __init__(self, *values) -> None:
+        """Initialize with a sequence of values."""
         self._wrapped = _parse_stream_parameters(*values)
         self._transformations = []
         self._is_reduced = False
 
     def map(self, fn) -> Self:
+        """Add a transformation function to the stream to be later processed."""
         self._transformations.append((OperationType.MAP, fn))
         return self
 
     def filter(self, fn) -> Self:
+        """Pass a filtering function to exclude values from this step of the stream onwards."""
         self._transformations.append((OperationType.FILTER, fn))
         return self
 
-    def reduce(self, fn) -> Self:
-        self._transformations.append((OperationType.REDUCE, fn))
-        self._is_reduced = True
-        return self
+    def reduce(self, fn):
+        """
+        Reduce the stream to a final value based on the provided operation.
+
+        This action is FINAL, meaning the stream returns a value after this call and cannot be further chained upon.
+        """
+        transformations = self._apply_transformations()
+        return functools.reduce(fn, transformations)
 
     def skip(self, n: int) -> Self:
+        """Skip <n> elements from the current stream."""
+
         def fn(list_of_values: list):
             return islice(list_of_values, n, None)
 
@@ -60,17 +67,18 @@ class Stream:
                 return map(transformation, values)
             case OperationType.FILTER:
                 return filter(transformation, values)
-            case OperationType.REDUCE:
-                return reduce(transformation, values)
             case OperationType.SKIP:
                 return transformation(values)
             case _:
                 raise ValueError("Operation not supported")
 
-    def collect(self):
+    def _apply_transformations(self) -> Iterable:
         result = self._wrapped
         for op_type, tx in self._transformations:
             result = self._reducer(result, op_type, tx)
-        if self._is_reduced:
-            return result
+        return result
+
+    def collect(self) -> list:
+        """Return the all processed values (based on previous operation) into a final collectable (by default list)."""
+        result = self._apply_transformations()
         return list(result)
