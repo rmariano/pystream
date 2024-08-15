@@ -20,3 +20,12 @@ You can also use the `.reduce()` function to obtain a final result based on a pr
 >>> stream.reduce(lambda w1, w2: f"{w1}, {w2}")
 "Paris, London, Stockholm"
 ```
+
+It's also possible to use a specific object to collect the results into (by default is a list). For example, if the
+stream consists of key/value pairs, you can collect them into a dictionary:
+
+```python
+>>> Stream(("one", 1), ("two", 2), ("forty two", 42))
+>>> stream.collect(dict)
+{"one": 1, "two": 2, "forty two": 42}
+```
