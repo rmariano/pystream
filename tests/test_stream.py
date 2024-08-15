@@ -1,6 +1,8 @@
 """Tests for stream.py."""
 
+import pytest
 from pystream_collections.stream import Stream
+from pystream_collections.typedef import Collectable
 
 
 def test_collect_simple_filter() -> None:
@@ -25,3 +27,23 @@ def test_create_from_variable_length_arguments() -> None:
     assert Stream(1).collect() == [1]
     assert Stream(2, 3, 5, 7, 11).skip(2).collect() == [5, 7, 11]
     assert (res := Stream(range(10)).skip(2).skip(3).collect()) == list(range(5, 10)), res
+
+
+@pytest.mark.parametrize(
+    "collectable_type, expected",
+    (
+        (list, ["first", "second", "third"]),
+        (tuple, ("first", "second", "third")),
+    ),
+)
+def test_collect_list_tuple(collectable_type: type[Collectable], expected: Collectable) -> None:
+    """Collecting the values using the <collectable_type> should return the <expected>."""
+    stream = Stream("first", "second", "third")
+    assert stream.collect(collectable_type) == expected
+
+
+def test_collect_dict() -> None:
+    """Can use a dict to gather the <key,value> pairs."""
+    stream = Stream(("one", 1), ("two", 2), ("forty two", 42))
+    expected = {"one": 1, "two": 2, "forty two": 42}
+    assert stream.collect(dict) == expected

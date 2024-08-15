@@ -8,3 +8,6 @@ ReducedType = TypeVar("ReducedType")
 Mapper: TypeAlias = Callable[[T], T]
 Filter: TypeAlias = Callable[[T], bool]
 Reducer: TypeAlias = Callable[[T, T], ReducedType]
+
+Collectable: TypeAlias = list | tuple | dict
+TCollectable = type[Collectable]

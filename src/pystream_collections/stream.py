@@ -5,7 +5,7 @@ from itertools import islice
 from typing import Callable, Iterable, Self
 
 from pystream_collections.enums import OperationType
-from pystream_collections.typedef import Filter, Mapper, Reducer
+from pystream_collections.typedef import Collectable, Filter, Mapper, Reducer
 
 
 def _is_iterable(value: Iterable) -> bool:
@@ -91,7 +91,7 @@ class Stream:
             result = self._reducer(result, op_type, tx)
         return result
 
-    def collect(self) -> list:
+    def collect[TCollectable](self, collectable_type: type[Collectable] = list) -> Collectable:
         """Return the all processed values (based on previous operation) into a final collectable (by default list)."""
         result = self._apply_transformations()
-        return list(result)
+        return collectable_type(result)
