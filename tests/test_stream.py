@@ -1,7 +1,7 @@
 """Tests for stream.py."""
 
 import pytest
-from pystream_collections.stream import Stream
+from pystream_collections import Stream
 from pystream_collections.typedef import Collectable
 
 
