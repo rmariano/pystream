@@ -32,7 +32,6 @@ class Stream:
         """Initialize with a sequence of values."""
         self._wrapped = _parse_stream_parameters(*values)
         self._transformations = []
-        self._is_reduced = False
 
     def map(self, mapper_fn: Mapper) -> Self:
         """
