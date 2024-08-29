@@ -41,3 +41,18 @@ class BaseStream(ABC):
             has been registered.
 
         """
+
+    @abstractmethod
+    def skip(self, n: int) -> Self:
+        """
+        Skip the first <n> values from the stream.
+
+        Args:
+        ----
+            n (int): The number of elements to skip.
+
+        Returns:
+        -------
+            Self: A reference to the same object, with the function registered.
+
+        """

@@ -85,3 +85,17 @@ async def test_map_filter() -> None:
     async_stream = AsyncStream(_async_generator(10)).map(lambda x: x % 5).filter(bool)
     result = await async_stream.collect()
     assert result == [1, 2, 3, 4, 1, 2, 3, 4]
+
+
+@pytest.mark.asyncio
+async def test_skip() -> None:
+    """Skip some elements from the async stream iterator."""
+    astream_1 = AsyncStream(_async_generator(5)).skip(3)
+    astream_2 = AsyncStream(_async_generator(5)).skip(5)
+    astream_3 = AsyncStream(_async_generator(5)).skip(10)
+    astream_4 = AsyncStream(_async_generator(2)).skip(0)
+
+    assert await astream_1.collect() == [3, 4]
+    assert await astream_2.collect() == []
+    assert await astream_3.collect() == []
+    assert await astream_4.collect() == [0, 1]
