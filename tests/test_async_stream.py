@@ -53,3 +53,35 @@ async def test_collect_different_containers(collectable_type: type[Collectable],
 
     stream = AsyncStream(_stream())
     assert await stream.collect(collectable_type) == expected
+
+
+@pytest.mark.asyncio
+async def test_filter() -> None:
+    """Filter results."""
+    async_stream = AsyncStream(_async_generator(10)).filter(lambda x: x > 5)
+    result = await async_stream.collect()
+    assert result == [6, 7, 8, 9]
+
+
+@pytest.mark.asyncio
+async def test_chained_filter() -> None:
+    """Filter results, multiple times."""
+    async_stream = AsyncStream(_async_generator(10)).filter(lambda x: x > 5).filter(lambda x: x % 2 == 0)
+    result = await async_stream.collect()
+    assert result == [6, 8]
+
+
+@pytest.mark.asyncio
+async def test_filter_map() -> None:
+    """First filter, then map."""
+    async_stream = AsyncStream(_async_generator(10)).filter(lambda x: x > 5).map(lambda x: x % 2)
+    result = await async_stream.collect()
+    assert result == [0, 1, 0, 1]
+
+
+@pytest.mark.asyncio
+async def test_map_filter() -> None:
+    """First map, then filter."""
+    async_stream = AsyncStream(_async_generator(10)).map(lambda x: x % 5).filter(bool)
+    result = await async_stream.collect()
+    assert result == [1, 2, 3, 4, 1, 2, 3, 4]

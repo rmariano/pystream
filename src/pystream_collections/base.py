@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from typing import Self
 
-from pystream_collections.typedef import Mapper
+from pystream_collections.typedef import Filter, Mapper
 
 
 class BaseStream(ABC):
@@ -21,5 +21,23 @@ class BaseStream(ABC):
         Returns:
         -------
             Self: object with the transformation saved.
+
+        """
+
+    @abstractmethod
+    def filter(self, filter_fn: Filter) -> Self:
+        """
+        Add a filter function to the stream at the current stage.
+
+        Args:
+        ----
+            filter_fn (Filter): A function that takes as an argument a value of
+            the type the stream is currently holding, and evaluates to a boolean
+            expression.  f(x) -> true/false
+
+        Returns:
+        -------
+            Self: A reference to the same object, after the filtering function
+            has been registered.
 
         """
