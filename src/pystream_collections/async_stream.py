@@ -34,4 +34,4 @@ class AsyncStream(BaseStream):
         for op_type, tx_function in self._transformations:
             if op_type == OperationType.MAP:
                 values = map(tx_function, values)
-        return list(values)
+        return collectable_type(values)
