@@ -2,12 +2,13 @@
 
 from typing import AsyncIterator, Self
 
-from pystream_collections.typedef import Mapper
+from pystream_collections.base import BaseStream
+from pystream_collections.typedef import Collectable, Mapper
 
 from .enums import OperationType
 
 
-class AsyncStream:
+class AsyncStream(BaseStream):
     """A streaming object that works asynchronously."""
 
     def __init__(self, async_iterator: AsyncIterator) -> None:
@@ -27,7 +28,7 @@ class AsyncStream:
         self._transformations.append((OperationType.MAP, mapper_fn))
         return self
 
-    async def collect(self) -> list:
+    async def collect[TCollectable](self, collectable_type: type[Collectable] = list) -> Collectable:
         """Return the result of the chained operations as a list."""
         values = [v async for v in self._async_iterator]
         for op_type, tx_function in self._transformations:

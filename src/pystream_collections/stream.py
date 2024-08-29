@@ -4,6 +4,7 @@ import functools
 from itertools import islice
 from typing import Callable, Iterable, Self
 
+from pystream_collections.base import BaseStream
 from pystream_collections.enums import OperationType
 from pystream_collections.typedef import Collectable, Filter, Mapper, Reducer
 
@@ -25,7 +26,7 @@ def _parse_stream_parameters(*values) -> Iterable:
     return values
 
 
-class Stream:
+class Stream(BaseStream):
     """Define a stream to be used with regular synchronous iterator operations."""
 
     def __init__(self, *values) -> None:
