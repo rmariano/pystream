@@ -92,10 +92,43 @@ async def test_skip() -> None:
     """Skip some elements from the async stream iterator."""
     astream_1 = AsyncStream(_async_generator(5)).skip(3)
     astream_2 = AsyncStream(_async_generator(5)).skip(5)
-    astream_3 = AsyncStream(_async_generator(5)).skip(10)
+    astream_3 = AsyncStream(_async_generator(5)).skip(0).skip(10).skip(0).skip(3)
     astream_4 = AsyncStream(_async_generator(2)).skip(0)
 
-    assert await astream_1.collect() == [3, 4]
-    assert await astream_2.collect() == []
-    assert await astream_3.collect() == []
-    assert await astream_4.collect() == [0, 1]
+    assert await astream_1.collect() == [3, 4], "Skip some elements"
+    assert await astream_2.collect() == [], "Expected skipping all elements to yield empty."
+    assert await astream_3.collect() == [], "Chained skip should work"
+    assert await astream_4.collect() == [0, 1], "No skipping should work"
+
+
+@pytest.mark.asyncio
+async def test_skip_map() -> None:
+    """First skip, then map."""
+    astream = AsyncStream(_async_generator(5)).skip(3).map(lambda x: x + 1)
+    assert await astream.collect() == [4, 5]
+
+@pytest.mark.asyncio
+async def test_map_skip() -> None:
+    """First map, then skip."""
+    astream = AsyncStream(_async_generator(5)).map(str).skip(4)
+    assert await astream.collect() == ["4"]
+
+
+@pytest.mark.asyncio
+async def test_skip_filter() -> None:
+    """Filter, then skip."""
+    astream_empty = AsyncStream(_async_generator(5)).filter(lambda x: x > 99).skip(0)
+    astream_one = AsyncStream(_async_generator(3)).filter(bool).skip(1)
+
+    assert await astream_empty.collect() == []
+    assert await astream_one.collect() == [2]
+
+
+@pytest.mark.asyncio
+async def test_filter_skip() -> None:
+    """Skip, then filter."""
+    astream_empty = AsyncStream(_async_generator(5)).skip(9).filter(lambda _: True)
+    astream_one = AsyncStream(_async_generator(3)).skip(1).filter(lambda x: x > 1)
+
+    assert await astream_empty.collect() == []
+    assert await astream_one.collect() == [2]
