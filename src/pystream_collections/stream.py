@@ -8,6 +8,8 @@ from pystream_collections.base import BaseStream
 from pystream_collections.enums import OperationType
 from pystream_collections.typedef import Collectable, Filter, Mapper, Reducer
 
+_NOT_SET = object()
+
 
 def _is_iterable(value: Iterable) -> bool:
     try:
@@ -53,7 +55,7 @@ class Stream(BaseStream):
         self._transformations.append((OperationType.FILTER, filter_fn))
         return self
 
-    def reduce(self, reducer_fn: Reducer) -> object:
+    def reduce[T](self, reducer_fn: Reducer, initial: T = _NOT_SET) -> object:
         """
         Reduce the stream to a final value based on the provided operation.
 
@@ -63,7 +65,9 @@ class Stream(BaseStream):
         This action is FINAL, meaning the stream returns a value after this call and cannot be further chained upon.
         """
         transformations = self._apply_transformations()
-        return functools.reduce(reducer_fn, transformations)
+        if initial is _NOT_SET:
+            return functools.reduce(reducer_fn, transformations)
+        return functools.reduce(reducer_fn, transformations, initial)
 
     def skip(self, n: int) -> Self:
         """Skip <n> elements from the current stream."""

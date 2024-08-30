@@ -29,3 +29,39 @@ stream consists of key/value pairs, you can collect them into a dictionary:
 >>> stream.collect(dict)
 {"one": 1, "two": 2, "forty two": 42}
 ```
+
+## Asynchronous Code
+This library supports working with coroutines and asynchronous iterators as well. Working with the built-in `map()`, and
+`filter()` functions is great, and also the niceties of the `itertools` module, but there's no counterpart of these
+capabilities for asynchronous code.
+
+Instead, this more compact (and functional-like) object is provided, which can work like this:
+
+```python
+class Locker(NamedTuple):
+    name: str
+    size: str
+    is_available: bool
+
+async def _get_db_records() -> AsyncGenerator:
+    yield Locker("park street 1", "L", False)
+    yield Locker("Union street", "S", True)
+    yield Locker("Main Square 12", "M", False)
+    yield Locker("Central Station", "M", True)
+    yield Locker("Central Station2", "L", True)
+    yield Locker("Central Station3", "L", True)
+
+>>> count = (
+    await AsyncStream(_get_db_records())
+    .filter(lambda locker: locker.is_available)
+    .map(lambda locker: locker.size)
+    .collect(Counter)
+)
+{"S": 1, "M": 1, "L": 2}
+```
+
+## Motivation
+Missing the `itertools`-like capabilities is one of the most annoying things,
+when working with asynchronous code.  In addition, adding another interface for
+the programmer that allows chaining data structures, similar to how Unix
+pipelines work, enables programmers to think more clearly about their programs.

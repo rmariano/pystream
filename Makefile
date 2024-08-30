@@ -7,6 +7,7 @@ test: lint
 
 clean:
 	rm -fr dist/
+	find . -type d -name __pycache__ | xargs rm -fr {}
 
 lint:
 	$(RUN) ruff check src/ tests/
