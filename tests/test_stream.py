@@ -1,5 +1,7 @@
 """Tests for stream.py."""
 
+import operator
+
 import pytest
 from pystream_collections import Stream
 from pystream_collections.typedef import Collectable
@@ -15,6 +17,18 @@ def test_reduce_string() -> None:
     stream = Stream(("paris", "london", "stockholm")).map(str.title)
     assert stream.reduce(lambda w1, w2: f"{w1}, {w2}") == "Paris, London, Stockholm"
 
+
+def test_reduce_initial_value() -> None:
+    """Test reducing a stream with different initial values."""
+    assert Stream(1, 2, 3).reduce(operator.add, initial=0) == 6
+    assert Stream(1).reduce(operator.add, initial=99) == 100
+    assert Stream().reduce(operator.add, initial=1) == 1
+
+
+def test_reduce_empty() -> None:
+    """Reduce cannot be done if there're no values and not initial (default) value."""
+    with pytest.raises(TypeError):
+        Stream().reduce(operator.mul)
 
 def test_reduce_string_skip() -> None:
     """Test reducing a stream expression."""

@@ -1,5 +1,6 @@
 """Test the asynchronous implementation."""
 
+import operator
 from typing import AsyncGenerator
 
 import pytest
@@ -7,8 +8,8 @@ from pystream_collections import AsyncStream
 from pystream_collections.typedef import Collectable
 
 
-async def _async_generator(n: int) -> AsyncGenerator[int, None]:
-    for i in range(n):
+async def _async_generator(n: int, start: int = 0) -> AsyncGenerator[int, None]:
+    for i in range(start, n):
         yield i
 
 
@@ -132,3 +133,27 @@ async def test_filter_skip() -> None:
 
     assert await astream_empty.collect() == []
     assert await astream_one.collect() == [2]
+
+
+
+@pytest.mark.asyncio
+async def test_reduce() -> None:
+    """Return the final value, based on a function."""
+    assert await AsyncStream(_async_generator(11)).reduce(operator.add) == 55, "sum(0..10) == 55"
+    assert await AsyncStream(_async_generator(10)).reduce(operator.mul) == 0
+    assert await AsyncStream(_async_generator(5, start=1)).reduce(operator.mul) == 24, "4! == 24"
+
+
+@pytest.mark.asyncio
+async def test_reduce_initial_value() -> None:
+    """Test reducing a stream with different initial values."""
+    assert await AsyncStream(_async_generator(4)).reduce(operator.add, initial=0) == 6
+    assert await AsyncStream(_async_generator(2, start=1)).reduce(operator.add, initial=99) == 100
+    assert await AsyncStream(_async_generator(0)).reduce(operator.add, initial=1) == 1
+
+
+@pytest.mark.asyncio
+async def test_reduce_empty() -> None:
+    """Reduce cannot be done if there're no values and not initial (default) value."""
+    with pytest.raises(TypeError):
+        await AsyncStream(_async_generator(0)).reduce(operator.mul)
