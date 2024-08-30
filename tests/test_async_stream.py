@@ -1,7 +1,8 @@
 """Test the asynchronous implementation."""
 
 import operator
-from typing import AsyncGenerator
+from collections import Counter
+from typing import AsyncGenerator, NamedTuple
 
 import pytest
 from pystream_collections import AsyncStream
@@ -108,6 +109,7 @@ async def test_skip_map() -> None:
     astream = AsyncStream(_async_generator(5)).skip(3).map(lambda x: x + 1)
     assert await astream.collect() == [4, 5]
 
+
 @pytest.mark.asyncio
 async def test_map_skip() -> None:
     """First map, then skip."""
@@ -135,7 +137,6 @@ async def test_filter_skip() -> None:
     assert await astream_one.collect() == [2]
 
 
-
 @pytest.mark.asyncio
 async def test_reduce() -> None:
     """Return the final value, based on a function."""
@@ -157,3 +158,37 @@ async def test_reduce_empty() -> None:
     """Reduce cannot be done if there're no values and not initial (default) value."""
     with pytest.raises(TypeError):
         await AsyncStream(_async_generator(0)).reduce(operator.mul)
+
+
+@pytest.mark.asyncio
+async def test_all_methods_then_collect() -> None:
+    """Combine multiple chained operations, and then do a final collect."""
+
+    class Locker(NamedTuple):
+        name: str
+        size: str
+        is_available: bool
+
+    async def _get_db_records() -> AsyncGenerator:
+        yield Locker("park street 1", "L", False)
+        yield Locker("Union street", "S", True)
+        yield Locker("Main Square 12", "M", False)
+        yield Locker("Central Station", "M", True)
+        yield Locker("Central Station2", "L", True)
+        yield Locker("Central Station3", "L", True)
+
+    count = (
+        await AsyncStream(_get_db_records())
+        .filter(lambda locker: locker.is_available)
+        .map(lambda locker: locker.size)
+        .collect(Counter)
+    )
+    assert count == {"S": 1, "M": 1, "L": 2}
+
+
+@pytest.mark.asyncio
+async def test_api_reduce() -> None:
+    """Chain several methods, then reduce."""
+    stream = AsyncStream(_async_generator(100)).filter(lambda x: x == 0 or x >= 90).map(str).skip(1)
+    result = await stream.reduce(operator.add, initial="Numbers: ")
+    assert result == "Numbers: 90919293949596979899"
