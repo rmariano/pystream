@@ -9,8 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Check if version changed
-        uses: rpiambulance/action-pr-version-check
+        uses: rpiambulance/action-pr-version-check@master
         with:
           file: pyproject.toml
 
