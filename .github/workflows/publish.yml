@@ -8,7 +8,7 @@ on:
 
 jobs:
   pypi-publish:
-    name: Upload release to PyPI
+    name: Upload a new release 
     runs-on: ubuntu-latest
     environment:
       name: release
