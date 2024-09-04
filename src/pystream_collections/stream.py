@@ -55,7 +55,7 @@ class Stream(BaseStream):
         self._transformations.append((OperationType.FILTER, filter_fn))
         return self
 
-    def reduce[T](self, reducer_fn: Reducer, initial: T = _NOT_SET) -> object:
+    def reduce(self, reducer_fn: Reducer, initial: object = _NOT_SET) -> object:
         """
         Reduce the stream to a final value based on the provided operation.
 

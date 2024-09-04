@@ -113,7 +113,7 @@ class AsyncStream(BaseStream):
         values = await self._collect()
         return collectable_type([e async for e in values])
 
-    async def reduce[T](self, reducer_fn: Reducer, initial: T = _NOT_SET) -> object:
+    async def reduce(self, reducer_fn: Reducer, initial: object = _NOT_SET) -> object:
         """
         Reduce the stream to a final value based on the provided operation.
 
