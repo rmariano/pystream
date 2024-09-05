@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pystream_collections"
-version = "0.1.16"
+version = "0.1.17"
 description = "A helper library to manage collections more easily"
 authors = ["Mariano Anaya <mariano_anaya@yahoo.com.ar>"]
 readme = "README.md"
