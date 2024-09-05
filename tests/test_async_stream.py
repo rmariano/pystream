@@ -5,6 +5,7 @@ from collections import Counter
 from typing import AsyncGenerator, NamedTuple
 
 import pytest
+
 from pystream_collections import AsyncStream
 from pystream_collections.typedef import Collectable
 
