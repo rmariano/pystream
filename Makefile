@@ -1,4 +1,4 @@
-.PHONY: test lint clean format install build publish release
+.PHONY: test lint clean format install build publish release new-version
 
 RUN:=poetry run
 VERSION:=$(shell poetry version --short)
@@ -29,3 +29,6 @@ publish:
 release:
 	@echo "Releasing $(VERSION)"
 	gh release create $(VERSION) --generate-notes
+
+new-version:
+	./scripts/new-version.sh
