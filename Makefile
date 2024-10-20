@@ -4,7 +4,7 @@ RUN:=poetry run
 VERSION:=$(shell poetry version --short)
 
 test: lint
-	$(RUN) pytest --cov=pystream_collections --cov-report=xml tests
+	$(RUN) pytest --cov=pystream_collections --cov-report=xml --cov-report=term-missing tests
 
 clean:
 	rm -fr dist/
