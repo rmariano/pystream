@@ -193,3 +193,41 @@ async def test_api_reduce() -> None:
     stream = AsyncStream(_async_generator(100)).filter(lambda x: x == 0 or x >= 90).map(str).skip(1)
     result = await stream.reduce(operator.add, initial="Numbers: ")
     assert result == "Numbers: 90919293949596979899"
+
+
+class TestAsyncStreamClosed:
+    """Test the various scenarios on which a closed async stream object should raise an error."""
+
+    @pytest.mark.asyncio
+    async def test_collect_closes_stream(self) -> None:
+        """Collecting a closed async stream should raise an error."""
+        stream = AsyncStream(_async_generator(10))
+        assert await stream.collect() == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+        with pytest.raises(ValueError):
+            await stream.collect()
+        with pytest.raises(ValueError):
+            await stream.reduce(operator.add)
+        with pytest.raises(ValueError):
+            stream.skip(0)
+        with pytest.raises(ValueError):
+            stream.filter(lambda _: True)
+        with pytest.raises(ValueError):
+            stream.map(str)
+
+    @pytest.mark.asyncio
+    async def test_reduce_closes_stream(self) -> None:
+        """Reducing a closed async stream should raise an error."""
+        stream = AsyncStream(_async_generator(10))
+        assert await stream.reduce(operator.add) == 45
+
+        with pytest.raises(ValueError):
+            await stream.collect()
+        with pytest.raises(ValueError):
+            await stream.reduce(operator.add)
+        with pytest.raises(ValueError):
+            stream.skip(0)
+        with pytest.raises(ValueError):
+            stream.filter(lambda _: True)
+        with pytest.raises(ValueError):
+            stream.map(str)
