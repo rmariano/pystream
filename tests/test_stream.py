@@ -62,3 +62,46 @@ def test_collect_dict() -> None:
     stream = Stream(("one", 1), ("two", 2), ("forty two", 42))
     expected = {"one": 1, "two": 2, "forty two": 42}
     assert stream.collect(dict) == expected
+
+
+class TestStreamClosed:
+    """
+    Test stream is closed.
+
+    After any of the final operations has been called (e.g collect(), reduce()),
+    the stream can't be used anymore, so calling any other operation, should raise
+    an exception.
+    """
+
+    def test_collect_closes_the_stream(self) -> None:
+        """Once .collect() is invoked, nothing else can be called."""
+        stream = Stream(1, 2, 3)
+        assert stream.collect() == [1, 2, 3]
+
+        with pytest.raises(ValueError):
+            stream.map(lambda x: x + 1)
+        with pytest.raises(ValueError):
+            stream.filter(lambda x: x > 1)
+        with pytest.raises(ValueError):
+            stream.skip(1)
+        with pytest.raises(ValueError):
+            stream.reduce(operator.add)
+        with pytest.raises(ValueError):
+            stream.collect()
+
+
+    def test_reduce_closes_the_stream(self) -> None:
+        """Once .reduce() is invoked, nothing else can be called."""
+        stream = Stream(1, 2, 3)
+        assert stream.reduce(operator.add) == 6
+
+        with pytest.raises(ValueError):
+            stream.map(lambda x: x + 1)
+        with pytest.raises(ValueError):
+            stream.filter(lambda x: x > 1)
+        with pytest.raises(ValueError):
+            stream.skip(1)
+        with pytest.raises(ValueError):
+            stream.reduce(operator.mul)
+        with pytest.raises(ValueError):
+            stream.collect()

@@ -35,6 +35,14 @@ class Stream(BaseStream):
         """Initialize with a sequence of values."""
         self._wrapped = _parse_stream_parameters(*values)
         self._transformations = []
+        self._is_closed = False
+
+    def _validate_is_not_closed(self) -> None:
+        if self._is_closed:
+            raise ValueError("Stream is closed and cannot be further chained")
+
+    def _close(self) -> None:
+        self._is_closed = True
 
     def map(self, mapper_fn: Mapper) -> Self:
         """
@@ -42,6 +50,7 @@ class Stream(BaseStream):
 
         Provide a mapper function that will transform an individual value.
         """
+        self._validate_is_not_closed()
         self._transformations.append((OperationType.MAP, mapper_fn))
         return self
 
@@ -52,6 +61,7 @@ class Stream(BaseStream):
 
         The function should evaluate to a boolean value.
         """
+        self._validate_is_not_closed()
         self._transformations.append((OperationType.FILTER, filter_fn))
         return self
 
@@ -64,13 +74,16 @@ class Stream(BaseStream):
 
         This action is FINAL, meaning the stream returns a value after this call and cannot be further chained upon.
         """
+        self._validate_is_not_closed()
         transformations = self._apply_transformations()
+        self._close()
         if initial is _NOT_SET:
             return functools.reduce(reducer_fn, transformations)
         return functools.reduce(reducer_fn, transformations, initial)
 
     def skip(self, n: int) -> Self:
         """Skip <n> elements from the current stream."""
+        self._validate_is_not_closed()
 
         def fn(list_of_values: Iterable) -> Iterable:
             return islice(list_of_values, n, None)
@@ -97,5 +110,8 @@ class Stream(BaseStream):
 
     def collect[TCollectable](self, collectable_type: type[Collectable] = list) -> Collectable:
         """Return the all processed values (based on previous operation) into a final collectable (by default list)."""
+        self._validate_is_not_closed()
         result = self._apply_transformations()
-        return collectable_type(result)
+        result = collectable_type(result)
+        self._close()
+        return result

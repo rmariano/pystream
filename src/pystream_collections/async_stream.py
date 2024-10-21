@@ -35,9 +35,18 @@ class AsyncStream(BaseStream):
         """
         self._async_iterator = async_iterator
         self._transformations = []
+        self._is_closed = False
+
+    def _validate_is_not_closed(self) -> None:
+        if self._is_closed:
+            raise ValueError("Stream is closed and cannot be further chained")
+
+    def _close(self) -> None:
+        self._is_closed = True
 
     def map(self, mapper_fn: Mapper) -> Self:
         """Add a mapper function to this stream."""
+        self._validate_is_not_closed()
         self._transformations.append((OperationType.MAP, mapper_fn))
         return self
 
@@ -54,6 +63,7 @@ class AsyncStream(BaseStream):
             Self: A reference to this same object, with the filter registered.
 
         """
+        self._validate_is_not_closed()
         self._transformations.append((OperationType.FILTER, filter_fn))
         return self
 
@@ -70,6 +80,7 @@ class AsyncStream(BaseStream):
             Self: A reference to this same object, with the skip registered.
 
         """
+        self._validate_is_not_closed()
         self._transformations.append((OperationType.SKIP, lambda i: i < n))
         return self
 
@@ -110,7 +121,9 @@ class AsyncStream(BaseStream):
 
     async def collect[TCollectable](self, collectable_type: type[Collectable] = list) -> Collectable:
         """Return the result of the chained operations as a list."""
+        self._validate_is_not_closed()
         values = await self._collect()
+        self._close()
         return collectable_type([e async for e in values])
 
     async def reduce(self, reducer_fn: Reducer, initial: object = _NOT_SET) -> object:
@@ -137,6 +150,7 @@ class AsyncStream(BaseStream):
             object: The final reduced value.
 
         """
+        self._validate_is_not_closed()
         collected = await self._collect()
         value = _NOT_SET if initial is _NOT_SET else initial
         async for element in collected:
@@ -145,4 +159,5 @@ class AsyncStream(BaseStream):
             value = reducer_fn(value, element)
         if value is _NOT_SET:
             raise TypeError("Cannot reduce with an empty async iterator and no initial value.")
+        self._close()
         return value
